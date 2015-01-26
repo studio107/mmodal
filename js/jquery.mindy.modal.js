@@ -39,7 +39,9 @@
             animation: 'animated',
             background: 'mmodal-modal-bg',
             closeButton: 'mmodal-close',
-            bodyClass: 'mmodal-opened'
+            bodyClass: 'mmodal-opened',
+            loading: 'mmodal-loading',
+            loader: 'mmodal-loader'
         },
         init: function (element, options) {
             var defaultOptions = {
@@ -47,6 +49,7 @@
                     type: "GET",
                     dataType: null
                 },
+                preloader: true,
                 animation: false,
                 animationdelay: 1.3,
                 skin: 'default',
@@ -71,12 +74,27 @@
 
             this.options = $.extend(defaultOptions, options);
 
+            if (this.options.preloader) {
+                if (!$('body').hasClass(this.classes.loading)) {
+                    this.showPreloader();
+                } else {
+                    return false;
+                }
+            }
+
             if (this.$element.is("a")) {
                 this._prepareLink();
             } else {
                 this.start(this.$element.clone());
             }
             return this;
+        },
+        showPreloader: function(){
+            var $preloader = $('<div/>').addClass(this.classes.loader);
+            $('body').addClass(this.classes.loading).append($preloader);
+        },
+        hidePreloader: function(){
+            $('body').removeClass(this.classes.loading).find('.' + this.classes.loader).remove();
         },
         getContainer: function () {
             return this.$container == undefined ? this.renderContainer() : this.$container;
@@ -219,7 +237,9 @@
                 before = $body.outerWidth();
 
             this.options.onBeforeOpen();
-
+            if (this.options.preloader) {
+                this.hidePreloader();
+            }
             this.$bg.show();
             this.$container.css('width', this.options.width || this.$container.width()).show();
 
